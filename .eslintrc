@@ -1,0 +1,14 @@
+{
+  "root": true,
+  "parser": "vue-eslint-parser",
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "extends": [
+    "airbnb-base",
+    "plugin:vue/essential"
+  ],
+  "plugins": [
+    "html"
+  ]
+}

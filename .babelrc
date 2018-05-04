@@ -1,0 +1,20 @@
+{
+  "presets": [
+    "es2015",
+    "stage-0"
+  ],
+  "plugins": [
+    "transform-vue-jsx",
+    "transform-runtime",
+    [
+      "import",
+      [
+        {
+          "libraryName": "free-vui",
+          "libraryDirectory": "src/components"
+        }
+      ]
+    ]
+  ],
+  "comments": true
+}
