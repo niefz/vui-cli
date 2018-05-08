@@ -10,8 +10,7 @@
       "import",
       [
         {
-          "libraryName": "free-vui",
-          "libraryDirectory": "src/components"
+          "libraryName": "free-vui"
         }
       ]
     ]
