@@ -16,6 +16,7 @@ const BUILD_PATH = resolve(__dirname, 'dist');
 module.exports = webpackMerge(webpackBaseConfig, {
   mode: 'production',
   output: {
+    publicPath: '/',
     path: BUILD_PATH
   },
   optimization: {

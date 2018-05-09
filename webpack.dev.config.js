@@ -13,6 +13,7 @@ const APP_PATH = resolve(__dirname, 'src');
 module.exports = webpackMerge(webpackBaseConfig, {
   mode: 'development',
   output: {
+    publicPath: '/',
     path: APP_PATH
   },
   devtool: 'cheap-eval-source-map',
