@@ -1,46 +1,58 @@
 /**
- * Created by niefz on 2018/1/8.
+ * Created by niefz on 2018/9/11.
  */
-const {resolve} = require('path');
+const { resolve } = require('path');
 const webpack = require('webpack');
+const webpackMerge = require('webpack-merge');
+const VueLoaderPlugin = require('vue-loader/lib/plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const vueLoaderConfig = require('./vue-loader.config.js');
+const HappyPack = require('happypack');
+const os = require('os');
+const happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
+
+// 多入口
+const multipageConfig = require('./multipage.config.js');
 
 const APP_PATH = resolve(__dirname, 'src');
 
-module.exports = {
+module.exports = webpackMerge({
   entry: {
-    vendors: ['axios', 'vue', 'vue-i18n', 'vue-router', 'vuex'],
-    index: APP_PATH
+    vendors: ['axios', 'babel-polyfill', 'vue', 'vue-i18n', 'vue-router', 'vuex'],
+    index: 'src/index.js'
   },
   output: {
+    publicPath: '/',
     filename: 'assets/js/[name].min.js?v=[hash:8]',
     chunkFilename: 'assets/js/[name].min.js?v=[chunkhash:8]'
   },
   module: {
     rules: [
       {
-        test: /\.html$/,
+        test: /\.x?html?$/,
+        include: /src/,
+        exclude: /node_modules/,
         use: [
           {
-            loader: 'htmllint'
+            loader: 'htmllint-loader',
+            query: {
+              failOnError: true,
+              failOnWarning: false
+            },
           },
           {
-            loader: 'html'
+            loader: 'html-loader'
           }
         ]
       },
       {
+        enforce: 'pre',
         test: /\.(js|vue)$/,
         include: /src/,
         exclude: /node_modules/,
-        enforce: 'pre',
         use: [
           {
-            loader: 'eslint',
-            options: {
-              formatter: require('eslint-friendly-formatter')
-            }
+            loader: 'happypack/loader?id=eslint'
           }
         ]
       },
@@ -50,11 +62,7 @@ module.exports = {
         exclude: /node_modules/,
         use: [
           {
-            loader: 'babel',
-            options: {
-              sourceMap: true,
-              cacheDirectory: true
-            }
+            loader: 'happypack/loader?id=babel'
           }
         ]
       },
@@ -63,57 +71,32 @@ module.exports = {
         use: [
           {
             loader: MiniCssExtractPlugin.loader,
-            options: {
-              sourceMap: true
-            }
           },
           {
-            loader: 'css'
-          },
-          {
-            loader: 'postcss'
-          },
-          {
-            loader: 'sass'
+            loader: 'happypack/loader?id=sass'
           }
         ]
       },
       {
-        test: /\.less$/,
+        test: /\.(png|jpe?g|gif)$/,
         use: [
           {
-            loader: MiniCssExtractPlugin.loader,
+            loader: 'url-loader',
             options: {
-              sourceMap: true
-            }
-          },
-          {
-            loader: 'css'
-          },
-          {
-            loader: 'postcss'
-          },
-          {
-            loader: 'less'
-          }
-        ]
-      },
-      {
-        test: /\.(png|jpe?g|gif|svg)$/,
-        use: [
-          {
-            loader: 'url',
-            options: {
-              limit: 8192
+              limit: 8192,
+              name: 'assets/images/[name].[ext]?v=[hash:8]'
             }
           }
         ]
       },
       {
-        test: /\.(woff2?|eot|ttf|otf)$/,
+        test: /\.(woff2?|eot|ttf|otf|svg)$/,
         use: [
           {
-            loader: 'file'
+            loader: 'file-loader',
+            options: {
+              name: 'assets/fonts/[name].[ext]?v=[hash:8]'
+            }
           }
         ]
       },
@@ -121,43 +104,96 @@ module.exports = {
         test: /\.vue$/,
         use: [
           {
-            loader: 'vue',
-            options: vueLoaderConfig
+            loader: 'vue-loader'
           }
         ]
       }
     ]
   },
   resolve: {
-    extensions: ['.js', '.vue'],
+    extensions: ['.js', '.scss', '.vue'],
     alias: {
-      '@': APP_PATH
+      'vue': 'vue/dist/vue.js',
+      'src': APP_PATH
     }
-  },
-  resolveLoader: {
-    moduleExtensions: ['-loader']
   },
   optimization: {
     splitChunks: {
       cacheGroups: {
         vendors: {
           test: /node_modules/,
-          chunks: 'initial',
           name: 'vendors',
+          chunks: 'all',
           priority: 10
         },
         commons: {
           name: 'commons',
           chunks: 'initial',
-          minChunks: 2
+          minChunks: Infinity
         }
       }
     }
   },
   plugins: [
+    new VueLoaderPlugin(),
+    new HappyPack({
+      id: 'eslint',
+      threadPool: happyThreadPool,
+      loaders: [
+        {
+          loader: 'eslint-loader',
+          options: {
+            formatter: require('eslint-friendly-formatter')
+          }
+        }
+      ]
+    }),
+    new HappyPack({
+      id: 'babel',
+      threadPool: happyThreadPool,
+      loaders: [
+        {
+          loader: 'babel-loader',
+          options: {
+            sourceMap: true,
+            cacheDirectory: true
+          }
+        }
+      ]
+    }),
+    new HappyPack({
+      id: 'sass',
+      threadPool: happyThreadPool,
+      loaders: [
+        {
+          loader: 'css-loader'
+        },
+        {
+          loader: 'postcss-loader'
+        },
+        {
+          loader: 'sass-loader'
+        }
+      ]
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'index.html',
+      template: 'src/index.html',
+      inject: 'body',
+      favicon: 'src/favicon.ico',
+      minify: {
+        collapseWhitespace: true,
+        removeComments: true,
+        removeEmptyAttributes: true,
+        removeRedundantAttributes: true,
+        sortAttributes: true,
+        sortClassName: true
+      },
+      chunks: ['vendors', 'commons', 'index'],
+      chunksSortMode: 'dependency'
+    }),
     new MiniCssExtractPlugin({
-      filename: 'assets/css/[name].min.css?v=[hash:8]',
-      allChunks: true
+      filename: 'assets/css/[name].min.css?v=[hash:8]'
     })
   ]
-};
+}, multipageConfig);

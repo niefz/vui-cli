@@ -1,11 +1,12 @@
 /**
- * Created by niefz on 2018/1/8.
+ * Created by niefz on 2018/9/11.
  */
-const {resolve} = require('path');
+const { resolve } = require('path');
 const webpack = require('webpack');
 const webpackMerge = require('webpack-merge');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const StyleLintPlugin = require('stylelint-webpack-plugin');
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin');
+
 const webpackBaseConfig = require('./webpack.base.config.js');
 
 const APP_PATH = resolve(__dirname, 'src');
@@ -13,33 +14,39 @@ const APP_PATH = resolve(__dirname, 'src');
 module.exports = webpackMerge(webpackBaseConfig, {
   mode: 'development',
   output: {
-    publicPath: '/',
     path: APP_PATH
   },
-  devtool: 'cheap-eval-source-map',
+  devtool: 'cheap-module-eval-source-map',
   devServer: {
+    proxy: {
+      '/': {
+        target: '/',
+        secure: false
+      }
+    },
     contentBase: APP_PATH,
     compress: true,
     historyApiFallback: true,
-    host: 'localhost',
+    allowedHosts: [],
     hot: true,
-    inline: true,
     open: true,
+    port: 12586,
     overlay: {
       warnings: true,
       errors: true
-    },
-    port: 8080,
-    publicPath: '/'
+    }
+  },
+  watchOptions: {
+    ignored: /node_modules/
   },
   plugins: [
-    new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: resolve('src/index.html'),
-      inject: 'body'
+    new StyleLintPlugin({
+      context: 'src/',
+      files: ['**/*.{vue,html,s?(a|c)ss}'],
+      cache: true
     }),
     new FriendlyErrorsPlugin(),
-    new webpack.NamedModulesPlugin(),
-    new webpack.HotModuleReplacementPlugin()
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.NamedModulesPlugin()
   ]
 });

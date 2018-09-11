@@ -1,11 +1,24 @@
 /**
- * Created by niefz on 2018/1/8.
+ * Created by niefz on 2018/8/27.
  */
 module.exports = {
-  plugins: [
-    require('autoprefixer')({
-      browsers: ['last 20 versions']
-    }),
-    require('cssnano')()
-  ]
+  plugins: {
+    'postcss-salad': {
+      browsers: ['last 20 versions'],
+      features: {
+        bem: {
+          shortcuts: {
+            component: 'b',
+            descendent: 'e',
+            modifier: 'm'
+          },
+          separators: {
+            descendent: '-',
+            modifier: '--'
+          }
+        }
+      }
+    },
+    'cssnano': {}
+  }
 };

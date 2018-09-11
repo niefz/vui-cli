@@ -1,0 +1,59 @@
+@import "variables";
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', SimSun, sans-serif;
+  font-size: 12px;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+.clearfix::before,
+.clearfix::after {
+  position: relative;
+  display: table;
+  content: '';
+}
+
+.clearfix::after {
+  clear: both;
+}
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.fl {
+  float: left;
+}
+
+.fr {
+  float: right;
+}
+
+.text-align-right {
+  text-align: right;
+}
+
+.text-overflow-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.iconfont {
+  font-family: 'iconfont', sans-serif;
+}
+
+@font-face {
+  font-family: 'iconfont';  /* project id 670254 */
+  src: url('./font/iconfont.eot');
+  src: url('./font/iconfont.eot?#iefix') format('embedded-opentype'), url('./font/iconfont.woff') format('woff'), url('./font/iconfont.ttf') format('truetype'), url('./font/iconfont.svg#iconfont') format('svg');
+}
